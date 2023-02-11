@@ -1,0 +1,8 @@
+
+    POST http://localhost:8080/challenge
+    Content-Type: application/json
+
+    # The request body, if any
+    {
+        "userId": "0966d059c9b9"
+    }
