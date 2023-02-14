@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Challenge struct {
@@ -16,7 +18,6 @@ type Challenge struct {
 	Claim  string `json:"claim"`
 }
 
-// ChallengePost handles challenge check requests
 func ChallengePost(c echo.Context) error {
 	var requestChallenge Challenge
 	if err := c.Bind(&requestChallenge); err != nil {
@@ -38,7 +39,11 @@ func ChallengePost(c echo.Context) error {
 		Claim:  claim,
 	}
 
-	_, err := collection.InsertOne(ctx, challenge)
+	// Check if the userId already exists in the database
+	filter := bson.M{"userId": challenge.UserID}
+	update := bson.M{"$set": bson.M{"claim": challenge.Claim}}
+	upsert := true
+	_, err := collection.UpdateOne(ctx, filter, update, &options.UpdateOptions{Upsert: &upsert})
 	if err != nil {
 		return err
 	}
